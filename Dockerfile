@@ -1,5 +1,7 @@
 FROM ghcr.io/linuxserver/baseimage-rdesktop-web:focal
 
+ARG BUILDARCH
+
 LABEL org.opencontainers.image.authors="github@sytone.com"
 LABEL org.opencontainers.image.source="https://github.com/sytone/obsidian-remote"
 LABEL org.opencontainers.image.title="Container hosted Obsidian MD"
@@ -23,21 +25,14 @@ RUN \
         /var/tmp/* \
         /tmp/*
 
-# set version label
+# # set version label
 ARG OBSIDIAN_VERSION=0.15.9
 
-RUN \
-    echo "**** download obsidian ****" && \
-        curl \
-        https://github.com/obsidianmd/obsidian-releases/releases/download/v$OBSIDIAN_VERSION/Obsidian-$OBSIDIAN_VERSION.AppImage \
-        -L \
-        -o obsidian.AppImage
+COPY download-obsidian.sh ./
+RUN echo "**** download and extract obsidian ****"
+RUN chmod +x download-obsidian.sh && ./download-obsidian.sh
 
-RUN \
-    echo "**** extract obsidian ****" && \
-        chmod +x /obsidian.AppImage && \
-        /obsidian.AppImage --appimage-extract
-
+RUN echo "**** set up obsidian ****"
 ENV \
     CUSTOM_PORT="8080" \
     GUIAUTOSTART="true" \
